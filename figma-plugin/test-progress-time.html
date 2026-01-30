@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Progress Indicator Time Test</title>
+  <style>
+    body {
+      font-family: Inter, system-ui, sans-serif;
+      margin: 20px;
+      background: #ffffff;
+      color: #111;
+    }
+
+    .progress-indicator {
+      border: 1px solid #e5e5e5;
+      border-radius: 8px;
+      padding: 16px;
+      background: #fafafa;
+      max-width: 400px;
+    }
+
+    .progress-stage {
+      font-size: 13px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 8px;
+    }
+
+    .progress-bar-container {
+      width: 100%;
+      height: 8px;
+      background: #e5e5e5;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #0d99ff, #00d4ff);
+      border-radius: 4px;
+      transition: width 0.3s ease;
+      width: 0%;
+    }
+
+    .progress-time {
+      font-size: 11px;
+      color: #777;
+      text-align: center;
+    }
+
+    button {
+      margin: 10px 5px;
+      padding: 10px 20px;
+      border-radius: 8px;
+      border: none;
+      background: #0d99ff;
+      color: white;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #007be5;
+    }
+
+    .test-controls {
+      margin-top: 20px;
+      padding: 16px;
+      background: #f5f5f5;
+      border-radius: 8px;
+    }
+
+    h2 {
+      margin-top: 0;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Progress Indicator - Estimated Time Test</h1>
+
+<div id="progressIndicator" class="progress-indicator">
+  <div class="progress-stage" id="progressStage">Ready</div>
+  <div class="progress-bar-container">
+    <div class="progress-bar" id="progressBar"></div>
+  </div>
+  <div class="progress-time" id="progressTime"></div>
+</div>
+
+<div class="test-controls">
+  <h2>Test Controls</h2>
+  <button onclick="testStoryGeneration()">Test Story Generation (30s)</button>
+  <button onclick="testBackgroundGeneration()">Test Background Generation (60s)</button>
+  <button onclick="testComposition()">Test Composition (10s)</button>
+  <button onclick="testBackgroundProgress()">Test Background Progress Updates</button>
+  <button onclick="testComplete()">Test Complete</button>
+  <button onclick="testReset()">Reset</button>
+</div>
+
+<div class="test-controls">
+  <h2>Test Results</h2>
+  <div id="testResults" style="font-family: monospace; font-size: 12px;"></div>
+</div>
+
+<script>
+  class ProgressIndicator {
+    constructor() {
+      this.container = document.getElementById('progressIndicator');
+      this.stageElement = document.getElementById('progressStage');
+      this.progressBar = document.getElementById('progressBar');
+      this.timeElement = document.getElementById('progressTime');
+      
+      this.currentStage = null;
+      this.currentPercent = 0;
+      this.estimatedTime = null;
+      this.startTime = null;
+      this.updateInterval = null;
+    }
+
+    setStage(stage) {
+      this.currentStage = stage;
+      
+      const stageNames = {
+        'story-generation': 'Generating story structure...',
+        'background-generation': 'Generating backgrounds...',
+        'composition': 'Creating slides in Figma...',
+        'complete': 'Complete!'
+      };
+
+      this.stageElement.textContent = stageNames[stage] || stage;
+      
+      // Set initial time estimates for each stage
+      if (stage === 'story-generation') {
+        this.setEstimatedTime(30); // ~30 seconds for story generation
+        this.startTime = Date.now();
+      } else if (stage === 'background-generation') {
+        this.setEstimatedTime(60); // ~60 seconds for 5 backgrounds (12s each)
+        this.startTime = Date.now();
+        this.startCountdown();
+      } else if (stage === 'composition') {
+        this.setEstimatedTime(10); // ~10 seconds for composition
+        this.startTime = Date.now();
+      } else if (stage === 'complete') {
+        this.stopCountdown();
+        this.setEstimatedTime(0);
+      }
+    }
+
+    updateProgress(percent) {
+      this.currentPercent = Math.max(0, Math.min(100, percent));
+      this.progressBar.style.width = `${this.currentPercent}%`;
+    }
+
+    startCountdown() {
+      // Clear any existing interval
+      this.stopCountdown();
+      
+      // Update countdown every second
+      this.updateInterval = setInterval(() => {
+        if (this.estimatedTime !== null && this.estimatedTime > 0) {
+          this.estimatedTime--;
+          this.updateTimeDisplay();
+        } else {
+          this.stopCountdown();
+        }
+      }, 1000);
+    }
+
+    stopCountdown() {
+      if (this.updateInterval) {
+        clearInterval(this.updateInterval);
+        this.updateInterval = null;
+      }
+    }
+
+    setEstimatedTime(seconds) {
+      this.estimatedTime = seconds;
+      this.updateTimeDisplay();
+    }
+
+    updateTimeDisplay() {
+      if (this.estimatedTime === null || this.estimatedTime <= 0) {
+        this.timeElement.textContent = '';
+        return;
+      }
+
+      if (this.estimatedTime < 60) {
+        this.timeElement.textContent = `Estimated time remaining: ~${this.estimatedTime}s`;
+      } else {
+        const minutes = Math.floor(this.estimatedTime / 60);
+        const secs = this.estimatedTime % 60;
+        if (secs === 0) {
+          this.timeElement.textContent = `Estimated time remaining: ~${minutes}m`;
+        } else {
+          this.timeElement.textContent = `Estimated time remaining: ~${minutes}m ${secs}s`;
+        }
+      }
+    }
+
+    reset() {
+      this.stopCountdown();
+      this.currentStage = null;
+      this.currentPercent = 0;
+      this.estimatedTime = null;
+      this.startTime = null;
+      this.progressBar.style.width = '0%';
+      this.timeElement.textContent = '';
+      this.stageElement.textContent = 'Ready';
+    }
+  }
+
+  // Initialize ProgressIndicator
+  const progressIndicator = new ProgressIndicator();
+  const testResults = document.getElementById('testResults');
+
+  function log(message) {
+    const timestamp = new Date().toLocaleTimeString();
+    testResults.innerHTML += `[${timestamp}] ${message}<br>`;
+    testResults.scrollTop = testResults.scrollHeight;
+  }
+
+  function testStoryGeneration() {
+    log('Testing story generation stage...');
+    progressIndicator.reset();
+    progressIndicator.setStage('story-generation');
+    progressIndicator.updateProgress(10);
+    log(`Stage: ${progressIndicator.currentStage}, Time: ${progressIndicator.estimatedTime}s`);
+  }
+
+  function testBackgroundGeneration() {
+    log('Testing background generation stage...');
+    progressIndicator.reset();
+    progressIndicator.setStage('background-generation');
+    progressIndicator.updateProgress(0);
+    log(`Stage: ${progressIndicator.currentStage}, Time: ${progressIndicator.estimatedTime}s`);
+    log('Countdown started - watch the timer decrease!');
+  }
+
+  function testComposition() {
+    log('Testing composition stage...');
+    progressIndicator.reset();
+    progressIndicator.setStage('composition');
+    progressIndicator.updateProgress(50);
+    log(`Stage: ${progressIndicator.currentStage}, Time: ${progressIndicator.estimatedTime}s`);
+  }
+
+  function testBackgroundProgress() {
+    log('Testing background progress updates...');
+    progressIndicator.reset();
+    progressIndicator.setStage('background-generation');
+    
+    let completed = 0;
+    const total = 5;
+    
+    const interval = setInterval(() => {
+      completed++;
+      const percent = Math.round((completed / total) * 100);
+      progressIndicator.updateProgress(percent);
+      
+      if (completed < total) {
+        const remaining = (total - completed) * 12;
+        progressIndicator.setEstimatedTime(remaining);
+        log(`Background ${completed}/${total} complete, ${remaining}s remaining`);
+      } else {
+        progressIndicator.setEstimatedTime(0);
+        log(`All backgrounds complete!`);
+        clearInterval(interval);
+      }
+    }, 2000); // Simulate every 2 seconds
+  }
+
+  function testComplete() {
+    log('Testing complete stage...');
+    progressIndicator.setStage('complete');
+    progressIndicator.updateProgress(100);
+    log('Generation complete!');
+  }
+
+  function testReset() {
+    log('Resetting progress indicator...');
+    progressIndicator.reset();
+    log('Reset complete');
+  }
+
+  // Initial log
+  log('Progress Indicator Test Ready');
+  log('Click buttons above to test different scenarios');
+</script>
+
+</body>
+</html>

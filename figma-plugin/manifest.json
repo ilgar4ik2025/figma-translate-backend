@@ -1,0 +1,12 @@
+{
+  "name": "App Store Screenshot Translator PRO",
+  "id": "appstore-screenshot-translator-pro",
+  "api": "1.0.0",
+  "editorType": ["figma", "dev"],
+  "main": "code.js",
+  "ui": "ui.html",
+  "networkAccess": {
+    "allowedDomains": ["*"],
+    "reasoning": "During development this plugin needs to send translation requests to a configurable backend endpoint defined by the user. The exact domain may change between environments (local, staging, production), so unrestricted access is required in dev mode."
+  }
+}

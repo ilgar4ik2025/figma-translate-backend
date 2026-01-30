@@ -1,0 +1,1529 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <style>
+    body {
+      font-family: Inter, system-ui, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #ffffff;
+      color: #111;
+    }
+
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid #e5e5e5;
+      background: #fafafa;
+    }
+
+    .tab {
+      flex: 1;
+      padding: 12px 16px;
+      text-align: center;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+    }
+
+    .tab:hover {
+      background: #f0f0f0;
+    }
+
+    .tab.active {
+      background: #ffffff;
+      border-bottom-color: #0d99ff;
+      color: #0d99ff;
+    }
+
+    .tab-content {
+      display: none;
+      padding: 16px;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    h2 {
+      margin: 0 0 16px 0;
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .section { margin-bottom: 16px; }
+
+    .label {
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: #333;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      font-size: 13px;
+      padding: 8px;
+      border-radius: 8px;
+      border: 1px solid #dcdcdc;
+      box-sizing: border-box;
+    }
+
+    textarea { resize: vertical; }
+
+    button {
+      width: 100%;
+      height: 40px;
+      border-radius: 10px;
+      border: none;
+      background: #0d99ff;
+      color: white;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    button:hover { background: #007be5; }
+
+    .dropdown {
+      border: 1px solid #e5e5e5;
+      border-radius: 8px;
+      max-height: 160px;
+      overflow-y: auto;
+      margin-top: 6px;
+    }
+
+    .item {
+      padding: 6px 8px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    .item:hover { background: #f5f5f5; }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 6px;
+    }
+
+    .chip {
+      background: #eef5ff;
+      color: #0d99ff;
+      padding: 4px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .hint {
+      font-size: 11px;
+      color: #777;
+      margin-top: 4px;
+    }
+
+    /* Story Editor Styles */
+    .story-editor {
+      display: none;
+      margin-top: 16px;
+      border: 1px solid #e5e5e5;
+      border-radius: 8px;
+      padding: 16px;
+      background: #fafafa;
+    }
+
+    .story-editor.visible {
+      display: block;
+    }
+
+    .story-editor h3 {
+      margin: 0 0 12px 0;
+      font-size: 14px;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .slide-item {
+      background: white;
+      border: 1px solid #e5e5e5;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 12px;
+    }
+
+    .slide-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .slide-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .slide-number {
+      font-size: 12px;
+      font-weight: 600;
+      color: #0d99ff;
+    }
+
+    .slide-controls {
+      display: flex;
+      gap: 4px;
+    }
+
+    .slide-control-btn {
+      width: 28px;
+      height: 28px;
+      border: 1px solid #dcdcdc;
+      border-radius: 6px;
+      background: white;
+      color: #333;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+
+    .slide-control-btn:hover:not(:disabled) {
+      background: #f5f5f5;
+      border-color: #0d99ff;
+      color: #0d99ff;
+    }
+
+    .slide-control-btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    .slide-regenerate-btn {
+      width: auto;
+      height: 28px;
+      padding: 0 12px;
+      border: 1px solid #0d99ff;
+      border-radius: 6px;
+      background: white;
+      color: #0d99ff;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      transition: all 0.2s;
+    }
+
+    .slide-regenerate-btn:hover:not(:disabled) {
+      background: #0d99ff;
+      color: white;
+    }
+
+    .slide-regenerate-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      border-color: #dcdcdc;
+      color: #999;
+    }
+
+    .slide-regenerate-btn.regenerating {
+      opacity: 0.7;
+      pointer-events: none;
+    }
+
+    .slide-input {
+      width: 100%;
+      font-size: 13px;
+      padding: 6px 8px;
+      border-radius: 6px;
+      border: 1px solid #dcdcdc;
+      box-sizing: border-box;
+      margin-bottom: 8px;
+    }
+
+    .slide-input:focus {
+      outline: none;
+      border-color: #0d99ff;
+    }
+
+    .slide-description {
+      font-size: 11px;
+      color: #777;
+      line-height: 1.4;
+      margin-top: 4px;
+    }
+
+    /* Progress Indicator Styles */
+    .progress-indicator {
+      display: none;
+      margin-top: 16px;
+      border: 1px solid #e5e5e5;
+      border-radius: 8px;
+      padding: 16px;
+      background: #fafafa;
+    }
+
+    .progress-indicator.visible {
+      display: block;
+    }
+
+    .progress-stage {
+      font-size: 13px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 8px;
+    }
+
+    .progress-bar-container {
+      width: 100%;
+      height: 8px;
+      background: #e5e5e5;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #0d99ff, #00d4ff);
+      border-radius: 4px;
+      transition: width 0.3s ease;
+      width: 0%;
+    }
+
+    .progress-time {
+      font-size: 11px;
+      color: #777;
+      text-align: center;
+    }
+
+    .progress-error {
+      background: #fff5f5;
+      border: 1px solid #ffcccc;
+      border-radius: 6px;
+      padding: 12px;
+      margin-top: 8px;
+    }
+
+    .progress-error-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: #cc0000;
+      margin-bottom: 4px;
+    }
+
+    .progress-error-message {
+      font-size: 11px;
+      color: #666;
+      line-height: 1.4;
+    }
+
+    .button-secondary {
+      background: #f0f0f0;
+      color: #333;
+      margin-top: 8px;
+    }
+
+    .button-secondary:hover {
+      background: #e0e0e0;
+    }
+
+    /* Existing Elements Styles */
+    .existing-elements {
+      background: #f0f9ff;
+      border: 1px solid #b3e0ff;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 16px;
+    }
+
+    .existing-elements-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .existing-elements-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #0d99ff;
+    }
+
+    .existing-elements-btn {
+      width: auto;
+      height: 32px;
+      padding: 0 12px;
+      border: 1px solid #0d99ff;
+      border-radius: 6px;
+      background: white;
+      color: #0d99ff;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .existing-elements-btn:hover {
+      background: #0d99ff;
+      color: white;
+    }
+
+    .existing-elements-info {
+      font-size: 12px;
+      color: #555;
+      line-height: 1.5;
+    }
+
+    .existing-elements-detail {
+      margin-top: 4px;
+      font-size: 11px;
+      color: #777;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="tabs">
+  <div class="tab active" data-tab="localizer">Screenshot Localizer</div>
+  <div class="tab" data-tab="generator">Screenshot Generator</div>
+</div>
+
+<div id="localizer-tab" class="tab-content active">
+<h2>Screenshot Localizer</h2>
+
+<div class="section">
+  <div class="label">Source language</div>
+  <select id="sourceLang"></select>
+</div>
+
+<div class="section">
+  <div class="label">Target languages</div>
+  <input id="search" placeholder="Search language…" />
+  <div class="dropdown" id="list"></div>
+  <div class="chips" id="selected"></div>
+</div>
+
+<div class="section">
+  <div class="label">ASO mode</div>
+  <select id="asoMode">
+    <option value="neutral">Neutral</option>
+    <option value="short">Short (UI)</option>
+    <option value="marketing">Marketing</option>
+  </select>
+</div>
+
+<div class="section">
+  <div class="label">Glossary</div>
+  <textarea id="glossary" rows="3"
+    placeholder="MoodVibe=MoodVibe, Mental health=Mental health"></textarea>
+</div>
+
+<div class="section">
+  <div class="label">Backend endpoint</div>
+  <input id="endpoint"
+    placeholder="https://figma-translate-backend.vercel.app/api/translate" />
+</div>
+
+<button id="run">Run localization</button>
+</div>
+
+<div id="generator-tab" class="tab-content">
+<h2>Screenshot Generator</h2>
+
+<div id="existingElements" class="existing-elements" style="display: none;">
+  <div class="existing-elements-header">
+    <span class="existing-elements-title">✓ Previously Created Slides</span>
+    <button id="navigateToElements" class="existing-elements-btn">View in Canvas</button>
+  </div>
+  <div class="existing-elements-info" id="existingElementsInfo"></div>
+</div>
+
+<div class="section">
+  <div class="label">App Category</div>
+  <input id="appCategory" placeholder="e.g., Productivity, Health & Fitness" />
+</div>
+
+<div class="section">
+  <div class="label">Target Audience</div>
+  <input id="targetAudience" placeholder="e.g., Busy professionals, Students" />
+</div>
+
+<div class="section">
+  <div class="label">Style Preferences</div>
+  <textarea id="stylePreferences" rows="2" 
+    placeholder="e.g., Modern, minimalist, vibrant colors"></textarea>
+</div>
+
+<div class="section">
+  <div class="label">Screenshots (optional)</div>
+  <input type="file" id="screenshots" accept="image/png,image/jpeg" multiple />
+  <div class="hint">Upload up to 5 screenshots (PNG or JPEG, max 10MB each)</div>
+  <div id="uploadedFilesInfo" class="hint" style="color: #0d99ff; margin-top: 8px;"></div>
+</div>
+
+<button id="generate">Generate Screenshots</button>
+
+<div id="progressIndicator" class="progress-indicator">
+  <div class="progress-stage" id="progressStage">Initializing...</div>
+  <div class="progress-bar-container">
+    <div class="progress-bar" id="progressBar"></div>
+  </div>
+  <div class="progress-time" id="progressTime"></div>
+  <div id="progressError" class="progress-error" style="display: none;">
+    <div class="progress-error-title">Error</div>
+    <div class="progress-error-message" id="progressErrorMessage"></div>
+  </div>
+</div>
+
+<div id="storyEditor" class="story-editor">
+  <h3>Review and Edit Story</h3>
+  <div id="storySlides"></div>
+  <button id="confirmStory" style="margin-top: 12px;">Confirm and Generate Backgrounds</button>
+</div>
+</div>
+
+<script>
+  // ================= TAB MANAGER =================
+  class TabManager {
+    constructor() {
+      this.currentTab = 'localizer';
+      this.tabStates = {
+        localizer: {},
+        generator: {}
+      };
+      this.init();
+      this.loadPersistedState();
+    }
+
+    init() {
+      const tabs = document.querySelectorAll('.tab');
+      tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+          const tabId = tab.getAttribute('data-tab');
+          this.switchTab(tabId);
+        });
+      });
+
+      // Auto-save state periodically and on input changes
+      this.setupAutoSave();
+    }
+
+    setupAutoSave() {
+      // Save state on input changes for both tabs
+      const localizerInputs = ['sourceLang', 'asoMode', 'glossary', 'endpoint'];
+      localizerInputs.forEach(id => {
+        const element = document.getElementById(id);
+        if (element) {
+          element.addEventListener('change', () => this.saveTabState('localizer'));
+          element.addEventListener('input', () => this.saveTabState('localizer'));
+        }
+      });
+
+      const generatorInputs = ['appCategory', 'targetAudience', 'stylePreferences'];
+      generatorInputs.forEach(id => {
+        const element = document.getElementById(id);
+        if (element) {
+          element.addEventListener('change', () => this.saveTabState('generator'));
+          element.addEventListener('input', () => this.saveTabState('generator'));
+        }
+      });
+
+      // Save state before plugin closes
+      window.addEventListener('beforeunload', () => {
+        this.saveTabState(this.currentTab);
+        this.persistState();
+      });
+    }
+
+    switchTab(tabId) {
+      if (tabId === this.currentTab) return;
+
+      // Save current tab state
+      this.saveTabState(this.currentTab);
+      this.persistState();
+
+      // Update UI
+      document.querySelectorAll('.tab').forEach(tab => {
+        tab.classList.toggle('active', tab.getAttribute('data-tab') === tabId);
+      });
+
+      document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.toggle('active', content.id === `${tabId}-tab`);
+      });
+
+      // Restore new tab state
+      this.currentTab = tabId;
+      this.restoreTabState(tabId);
+      
+      // Check for existing elements when switching to generator tab
+      if (tabId === 'generator') {
+        this.checkExistingElements();
+      }
+      
+      // Persist current tab selection
+      this.persistState();
+    }
+
+    getCurrentTab() {
+      return this.currentTab;
+    }
+
+    saveTabState(tabId) {
+      if (tabId === 'localizer') {
+        this.tabStates.localizer = {
+          sourceLang: document.getElementById('sourceLang').value,
+          selectedLangs: [...selectedLangs],
+          asoMode: document.getElementById('asoMode').value,
+          glossary: document.getElementById('glossary').value,
+          endpoint: document.getElementById('endpoint').value
+        };
+      } else if (tabId === 'generator') {
+        this.tabStates.generator = {
+          appCategory: document.getElementById('appCategory').value,
+          targetAudience: document.getElementById('targetAudience').value,
+          stylePreferences: document.getElementById('stylePreferences').value,
+          // Store uploaded files as base64 for persistence
+          uploadedFiles: generatorForm ? generatorForm.uploadedFiles : []
+        };
+      }
+    }
+
+    restoreTabState(tabId) {
+      const state = this.tabStates[tabId];
+      if (!state || Object.keys(state).length === 0) return;
+
+      if (tabId === 'localizer') {
+        document.getElementById('sourceLang').value = state.sourceLang || 'EN';
+        selectedLangs = state.selectedLangs || [];
+        document.getElementById('asoMode').value = state.asoMode || 'neutral';
+        document.getElementById('glossary').value = state.glossary || '';
+        document.getElementById('endpoint').value = state.endpoint || '';
+        render();
+      } else if (tabId === 'generator') {
+        document.getElementById('appCategory').value = state.appCategory || '';
+        document.getElementById('targetAudience').value = state.targetAudience || '';
+        document.getElementById('stylePreferences').value = state.stylePreferences || '';
+        
+        // Restore uploaded files if available
+        if (generatorForm && state.uploadedFiles && state.uploadedFiles.length > 0) {
+          generatorForm.uploadedFiles = state.uploadedFiles;
+          generatorForm.updateUploadedFilesInfo(state.uploadedFiles.length);
+        }
+      }
+    }
+
+    // Persist state to plugin storage
+    persistState() {
+      const stateData = {
+        currentTab: this.currentTab,
+        tabStates: this.tabStates
+      };
+      
+      parent.postMessage({
+        pluginMessage: {
+          type: 'save-tab-state',
+          state: stateData
+        }
+      }, '*');
+    }
+
+    // Load persisted state from plugin storage
+    loadPersistedState() {
+      parent.postMessage({
+        pluginMessage: {
+          type: 'load-tab-state'
+        }
+      }, '*');
+    }
+
+    // Called when state is loaded from plugin code
+    applyPersistedState(stateData) {
+      if (!stateData) return;
+
+      if (stateData.currentTab) {
+        this.currentTab = stateData.currentTab;
+      }
+
+      if (stateData.tabStates) {
+        this.tabStates = stateData.tabStates;
+      }
+
+      // Restore the current tab UI
+      document.querySelectorAll('.tab').forEach(tab => {
+        tab.classList.toggle('active', tab.getAttribute('data-tab') === this.currentTab);
+      });
+
+      document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.toggle('active', content.id === `${this.currentTab}-tab`);
+      });
+
+      // Restore current tab state
+      this.restoreTabState(this.currentTab);
+      
+      // Check for existing elements if on generator tab
+      if (this.currentTab === 'generator') {
+        this.checkExistingElements();
+      }
+    }
+
+    // Check if previously created elements still exist
+    checkExistingElements() {
+      parent.postMessage({
+        pluginMessage: {
+          type: 'check-elements'
+        }
+      }, '*');
+    }
+  }
+
+  // Initialize TabManager
+  const tabManager = new TabManager();
+
+  // ================= LOCALIZER TAB (EXISTING) =================
+
+  const ALL_LANGUAGES = [
+    { code: 'EN', name: 'English' },
+    { code: 'RU', name: 'Russian' },
+    { code: 'KK', name: 'Kazakh' },
+    { code: 'DE', name: 'German' },
+    { code: 'FR', name: 'French' },
+    { code: 'ES', name: 'Spanish' },
+    { code: 'IT', name: 'Italian' },
+    { code: 'JA', name: 'Japanese' },
+    { code: 'KO', name: 'Korean' },
+    { code: 'ZH', name: 'Chinese' },
+    { code: 'PT', name: 'Portuguese' },
+    { code: 'TR', name: 'Turkish' },
+    { code: 'AR', name: 'Arabic' },
+    { code: 'HI', name: 'Hindi' }
+  ];
+
+  const sourceSelect = document.getElementById('sourceLang');
+  const search = document.getElementById('search');
+  const list = document.getElementById('list');
+  const selected = document.getElementById('selected');
+
+  let selectedLangs = [];
+
+  ALL_LANGUAGES.forEach(l => {
+    const opt = document.createElement('option');
+    opt.value = l.code;
+    opt.textContent = l.name;
+    sourceSelect.appendChild(opt);
+  });
+
+  sourceSelect.value = 'EN';
+
+  function renderList(filter = '') {
+    list.innerHTML = '';
+    ALL_LANGUAGES
+      .filter(l =>
+        l.name.toLowerCase().includes(filter.toLowerCase()) &&
+        !selectedLangs.includes(l.code) &&
+        l.code !== sourceSelect.value
+      )
+      .forEach(l => {
+        const div = document.createElement('div');
+        div.className = 'item';
+        div.textContent = l.name;
+        div.onclick = () => {
+          selectedLangs.push(l.code);
+          render();
+        };
+        list.appendChild(div);
+      });
+  }
+
+  function renderChips() {
+    selected.innerHTML = '';
+    selectedLangs.forEach(code => {
+      const l = ALL_LANGUAGES.find(x => x.code === code);
+      const chip = document.createElement('div');
+      chip.className = 'chip';
+      chip.textContent = l.name + ' ✕';
+      chip.onclick = () => {
+        selectedLangs = selectedLangs.filter(c => c !== code);
+        render();
+      };
+      selected.appendChild(chip);
+    });
+  }
+
+  function render() {
+    renderList(search.value);
+    renderChips();
+  }
+
+  search.oninput = () => render();
+  render();
+
+  document.getElementById('run').onclick = () => {
+    if (!selectedLangs.length) {
+      alert('Select at least one target language');
+      return;
+    }
+
+    const glossary = {};
+    document.getElementById('glossary').value.split(',')
+      .forEach(p => {
+        const [k, v] = p.split('=');
+        if (k && v) glossary[k.trim()] = v.trim();
+      });
+
+    parent.postMessage({
+      pluginMessage: {
+        type: 'run-localization',
+        sourceLang: sourceSelect.value,
+        targetLangs: selectedLangs,
+        asoMode: document.getElementById('asoMode').value,
+        glossary,
+        endpoint: document.getElementById('endpoint').value
+      }
+    }, '*');
+  };
+
+  // ================= GENERATOR TAB =================
+  
+  class GeneratorForm {
+    constructor() {
+      this.appCategory = document.getElementById('appCategory');
+      this.targetAudience = document.getElementById('targetAudience');
+      this.stylePreferences = document.getElementById('stylePreferences');
+      this.screenshots = document.getElementById('screenshots');
+      this.generateButton = document.getElementById('generate');
+      
+      this.uploadedFiles = [];
+      this.setupEventListeners();
+    }
+
+    setupEventListeners() {
+      // Real-time validation on input
+      [this.appCategory, this.targetAudience, this.stylePreferences].forEach(input => {
+        input.addEventListener('input', () => this.validateField(input));
+        input.addEventListener('blur', () => this.validateField(input));
+      });
+
+      // File upload handling
+      this.screenshots.addEventListener('change', (e) => this.handleFileUpload(e));
+    }
+
+    validateField(input) {
+      const value = input.value.trim();
+      
+      if (!value) {
+        input.style.borderColor = '#ff4444';
+        return false;
+      } else {
+        input.style.borderColor = '#dcdcdc';
+        return true;
+      }
+    }
+
+    validate() {
+      const errors = [];
+      
+      const category = this.appCategory.value.trim();
+      const audience = this.targetAudience.value.trim();
+      const style = this.stylePreferences.value.trim();
+
+      if (!category) {
+        errors.push('App Category is required');
+        this.appCategory.style.borderColor = '#ff4444';
+      }
+
+      if (!audience) {
+        errors.push('Target Audience is required');
+        this.targetAudience.style.borderColor = '#ff4444';
+      }
+
+      if (!style) {
+        errors.push('Style Preferences is required');
+        this.stylePreferences.style.borderColor = '#ff4444';
+      }
+
+      return {
+        isValid: errors.length === 0,
+        errors: errors
+      };
+    }
+
+    async handleFileUpload(event) {
+      const files = Array.from(event.target.files);
+      
+      if (files.length > 5) {
+        alert('You can upload a maximum of 5 screenshots');
+        this.screenshots.value = '';
+        this.updateUploadedFilesInfo(0);
+        return;
+      }
+
+      const validationResults = await Promise.all(
+        files.map(file => this.validateFile(file))
+      );
+
+      const invalidFiles = validationResults.filter(r => !r.isValid);
+      
+      if (invalidFiles.length > 0) {
+        const errorMessages = invalidFiles.map(r => r.error).join('\n');
+        alert('File validation failed:\n' + errorMessages);
+        this.screenshots.value = '';
+        this.updateUploadedFilesInfo(0);
+        return;
+      }
+
+      // Convert files to base64
+      this.uploadedFiles = await Promise.all(
+        files.map(file => this.fileToBase64(file))
+      );
+      
+      this.updateUploadedFilesInfo(this.uploadedFiles.length);
+    }
+
+    updateUploadedFilesInfo(count) {
+      const infoElement = document.getElementById('uploadedFilesInfo');
+      if (count > 0) {
+        infoElement.textContent = `✓ ${count} screenshot${count > 1 ? 's' : ''} uploaded`;
+      } else {
+        infoElement.textContent = '';
+      }
+    }
+
+    validateFile(file) {
+      return new Promise((resolve) => {
+        // Check file type
+        const validTypes = ['image/png', 'image/jpeg', 'image/jpg'];
+        if (!validTypes.includes(file.type)) {
+          resolve({
+            isValid: false,
+            error: `${file.name}: Invalid format. Only PNG and JPEG are supported.`
+          });
+          return;
+        }
+
+        // Check file size (10MB = 10 * 1024 * 1024 bytes)
+        const maxSize = 10 * 1024 * 1024;
+        if (file.size > maxSize) {
+          resolve({
+            isValid: false,
+            error: `${file.name}: File size exceeds 10MB limit.`
+          });
+          return;
+        }
+
+        resolve({ isValid: true });
+      });
+    }
+
+    fileToBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    getFormData() {
+      return {
+        category: this.appCategory.value.trim(),
+        audience: this.targetAudience.value.trim(),
+        style: this.stylePreferences.value.trim(),
+        screenshots: this.uploadedFiles.length > 0 ? this.uploadedFiles : undefined
+      };
+    }
+
+    reset() {
+      this.appCategory.value = '';
+      this.targetAudience.value = '';
+      this.stylePreferences.value = '';
+      this.screenshots.value = '';
+      this.uploadedFiles = [];
+      this.updateUploadedFilesInfo(0);
+      
+      // Reset border colors
+      [this.appCategory, this.targetAudience, this.stylePreferences].forEach(input => {
+        input.style.borderColor = '#dcdcdc';
+      });
+    }
+  }
+
+  // Initialize GeneratorForm
+  const generatorForm = new GeneratorForm();
+
+  // ================= STORY EDITOR =================
+  
+  class StoryEditor {
+    constructor() {
+      this.container = document.getElementById('storyEditor');
+      this.slidesContainer = document.getElementById('storySlides');
+      this.confirmButton = document.getElementById('confirmStory');
+      this.story = null;
+      
+      this.setupEventListeners();
+    }
+
+    setupEventListeners() {
+      this.confirmButton.addEventListener('click', () => {
+        const finalStory = this.getFinalStory();
+        
+        // Hide story editor and show progress
+        this.hide();
+        progressIndicator.show();
+        progressIndicator.setStage('background-generation');
+        progressIndicator.updateProgress(0);
+        
+        // Send message to plugin to generate backgrounds
+        parent.postMessage({
+          pluginMessage: {
+            type: 'generate-backgrounds',
+            story: finalStory
+          }
+        }, '*');
+      });
+    }
+
+    displayStory(story) {
+      this.story = story;
+      this.slidesContainer.innerHTML = '';
+      
+      if (!story || !story.slides || story.slides.length === 0) {
+        this.slidesContainer.innerHTML = '<p style="color: #777; font-size: 13px;">No story generated yet.</p>';
+        return;
+      }
+
+      story.slides.forEach((slide, index) => {
+        const slideElement = this.createSlideElement(slide, index);
+        this.slidesContainer.appendChild(slideElement);
+      });
+
+      this.show();
+    }
+
+    createSlideElement(slide, index) {
+      const slideDiv = document.createElement('div');
+      slideDiv.className = 'slide-item';
+      slideDiv.dataset.index = index;
+
+      slideDiv.innerHTML = `
+        <div class="slide-header">
+          <span class="slide-number">Slide ${index + 1}</span>
+          <div class="slide-controls">
+            <button class="slide-control-btn" data-action="move-up" data-index="${index}" title="Move up" ${index === 0 ? 'disabled' : ''}>
+              ▲
+            </button>
+            <button class="slide-control-btn" data-action="move-down" data-index="${index}" title="Move down" ${index === this.story.slides.length - 1 ? 'disabled' : ''}>
+              ▼
+            </button>
+            <button class="slide-regenerate-btn" data-action="regenerate" data-index="${index}" title="Regenerate this slide">
+              🔄 Regenerate
+            </button>
+          </div>
+        </div>
+        <input 
+          type="text" 
+          class="slide-input" 
+          data-field="headline" 
+          data-index="${index}"
+          value="${this.escapeHtml(slide.headline)}"
+          placeholder="Headline (max 6 words)"
+        />
+        <input 
+          type="text" 
+          class="slide-input" 
+          data-field="subheadline" 
+          data-index="${index}"
+          value="${this.escapeHtml(slide.subheadline)}"
+          placeholder="Subheadline (max 12 words)"
+        />
+        <div class="slide-description">${this.escapeHtml(slide.description)}</div>
+      `;
+
+      // Add event listeners for editing
+      const inputs = slideDiv.querySelectorAll('.slide-input');
+      inputs.forEach(input => {
+        input.addEventListener('input', (e) => {
+          this.editSlide(
+            parseInt(e.target.dataset.index),
+            e.target.dataset.field,
+            e.target.value
+          );
+        });
+      });
+
+      // Add event listeners for reordering buttons
+      const moveUpBtn = slideDiv.querySelector('[data-action="move-up"]');
+      const moveDownBtn = slideDiv.querySelector('[data-action="move-down"]');
+      const regenerateBtn = slideDiv.querySelector('[data-action="regenerate"]');
+      
+      if (moveUpBtn) {
+        moveUpBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          this.moveSlideUp(index);
+        });
+      }
+      
+      if (moveDownBtn) {
+        moveDownBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          this.moveSlideDown(index);
+        });
+      }
+
+      if (regenerateBtn) {
+        regenerateBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          this.regenerateSlide(index);
+        });
+      }
+
+      return slideDiv;
+    }
+
+    editSlide(slideIndex, field, value) {
+      if (!this.story || !this.story.slides[slideIndex]) return;
+      
+      this.story.slides[slideIndex][field] = value;
+    }
+
+    moveSlideUp(index) {
+      if (index === 0 || !this.story || !this.story.slides) return;
+      
+      // Swap slides
+      const temp = this.story.slides[index];
+      this.story.slides[index] = this.story.slides[index - 1];
+      this.story.slides[index - 1] = temp;
+      
+      // Update indices
+      this.story.slides[index].index = index;
+      this.story.slides[index - 1].index = index - 1;
+      
+      // Re-render
+      this.displayStory(this.story);
+    }
+
+    moveSlideDown(index) {
+      if (!this.story || !this.story.slides || index >= this.story.slides.length - 1) return;
+      
+      // Swap slides
+      const temp = this.story.slides[index];
+      this.story.slides[index] = this.story.slides[index + 1];
+      this.story.slides[index + 1] = temp;
+      
+      // Update indices
+      this.story.slides[index].index = index;
+      this.story.slides[index + 1].index = index + 1;
+      
+      // Re-render
+      this.displayStory(this.story);
+    }
+
+    reorderSlides(newOrder) {
+      if (!this.story || !this.story.slides) return;
+      
+      // Validate newOrder array
+      if (!Array.isArray(newOrder) || newOrder.length !== this.story.slides.length) {
+        console.error('Invalid newOrder array');
+        return;
+      }
+      
+      // Create new slides array based on newOrder
+      const reorderedSlides = newOrder.map((oldIndex, newIndex) => {
+        const slide = { ...this.story.slides[oldIndex] };
+        slide.index = newIndex;
+        return slide;
+      });
+      
+      this.story.slides = reorderedSlides;
+      
+      // Re-render
+      this.displayStory(this.story);
+    }
+
+    async regenerateSlide(slideIndex) {
+      if (!this.story || !this.story.slides[slideIndex]) {
+        console.error('Invalid slide index:', slideIndex);
+        return;
+      }
+
+      // Get the regenerate button and disable it
+      const slideElement = this.slidesContainer.querySelector(`[data-index="${slideIndex}"]`);
+      const regenerateBtn = slideElement?.querySelector('[data-action="regenerate"]');
+      
+      if (regenerateBtn) {
+        regenerateBtn.disabled = true;
+        regenerateBtn.classList.add('regenerating');
+        regenerateBtn.innerHTML = '⏳ Regenerating...';
+      }
+
+      // Get current app description from the form
+      const appDescription = generatorForm.getFormData();
+
+      // Send message to plugin to regenerate this specific slide
+      parent.postMessage({
+        pluginMessage: {
+          type: 'regenerate-slide',
+          slideIndex: slideIndex,
+          currentSlide: this.story.slides[slideIndex],
+          appDescription: appDescription
+        }
+      }, '*');
+    }
+
+    // Called when a slide has been regenerated
+    updateRegeneratedSlide(slideIndex, newSlideData) {
+      if (!this.story || !this.story.slides[slideIndex]) {
+        console.error('Invalid slide index:', slideIndex);
+        return;
+      }
+
+      // Update the slide data
+      this.story.slides[slideIndex] = {
+        ...this.story.slides[slideIndex],
+        ...newSlideData,
+        index: slideIndex // Preserve the index
+      };
+
+      // Re-render the entire story to update the UI
+      this.displayStory(this.story);
+    }
+
+    getFinalStory() {
+      return this.story;
+    }
+
+    show() {
+      this.container.classList.add('visible');
+    }
+
+    hide() {
+      this.container.classList.remove('visible');
+    }
+
+    escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+  }
+
+  // Initialize StoryEditor
+  const storyEditor = new StoryEditor();
+
+  // ================= PROGRESS INDICATOR =================
+  
+  class ProgressIndicator {
+    constructor() {
+      this.container = document.getElementById('progressIndicator');
+      this.stageElement = document.getElementById('progressStage');
+      this.progressBar = document.getElementById('progressBar');
+      this.timeElement = document.getElementById('progressTime');
+      this.errorContainer = document.getElementById('progressError');
+      this.errorMessage = document.getElementById('progressErrorMessage');
+      
+      this.currentStage = null;
+      this.currentPercent = 0;
+      this.estimatedTime = null;
+      this.startTime = null;
+      this.updateInterval = null;
+    }
+
+    setStage(stage) {
+      this.currentStage = stage;
+      
+      const stageNames = {
+        'story-generation': 'Generating story structure...',
+        'background-generation': 'Generating backgrounds...',
+        'composition': 'Creating slides in Figma...',
+        'complete': 'Complete!'
+      };
+
+      this.stageElement.textContent = stageNames[stage] || stage;
+      this.hideError();
+      
+      // Set initial time estimates for each stage
+      if (stage === 'story-generation') {
+        this.setEstimatedTime(30); // ~30 seconds for story generation
+        this.startTime = Date.now();
+      } else if (stage === 'background-generation') {
+        this.setEstimatedTime(60); // ~60 seconds for 5 backgrounds (12s each)
+        this.startTime = Date.now();
+        this.startCountdown();
+      } else if (stage === 'composition') {
+        this.setEstimatedTime(10); // ~10 seconds for composition
+        this.startTime = Date.now();
+      } else if (stage === 'complete') {
+        this.stopCountdown();
+        this.setEstimatedTime(0);
+      }
+    }
+
+    updateProgress(percent) {
+      this.currentPercent = Math.max(0, Math.min(100, percent));
+      this.progressBar.style.width = `${this.currentPercent}%`;
+    }
+
+    startCountdown() {
+      // Clear any existing interval
+      this.stopCountdown();
+      
+      // Update countdown every second
+      this.updateInterval = setInterval(() => {
+        if (this.estimatedTime !== null && this.estimatedTime > 0) {
+          this.estimatedTime--;
+          this.updateTimeDisplay();
+        } else {
+          this.stopCountdown();
+        }
+      }, 1000);
+    }
+
+    stopCountdown() {
+      if (this.updateInterval) {
+        clearInterval(this.updateInterval);
+        this.updateInterval = null;
+      }
+    }
+
+    setEstimatedTime(seconds) {
+      this.estimatedTime = seconds;
+      this.updateTimeDisplay();
+    }
+
+    updateTimeDisplay() {
+      if (this.estimatedTime === null || this.estimatedTime <= 0) {
+        this.timeElement.textContent = '';
+        return;
+      }
+
+      if (this.estimatedTime < 60) {
+        this.timeElement.textContent = `Estimated time remaining: ~${this.estimatedTime}s`;
+      } else {
+        const minutes = Math.floor(this.estimatedTime / 60);
+        const secs = this.estimatedTime % 60;
+        if (secs === 0) {
+          this.timeElement.textContent = `Estimated time remaining: ~${minutes}m`;
+        } else {
+          this.timeElement.textContent = `Estimated time remaining: ~${minutes}m ${secs}s`;
+        }
+      }
+    }
+
+    showError(message) {
+      this.errorMessage.textContent = message;
+      this.errorContainer.style.display = 'block';
+      this.stopCountdown(); // Stop countdown when error occurs
+    }
+
+    hideError() {
+      this.errorContainer.style.display = 'none';
+      this.errorMessage.textContent = '';
+    }
+
+    show() {
+      this.container.classList.add('visible');
+    }
+
+    hide() {
+      this.container.classList.remove('visible');
+      this.hideError();
+      this.stopCountdown(); // Stop countdown when hiding
+    }
+
+    reset() {
+      this.stopCountdown();
+      this.currentStage = null;
+      this.currentPercent = 0;
+      this.estimatedTime = null;
+      this.startTime = null;
+      this.progressBar.style.width = '0%';
+      this.timeElement.textContent = '';
+      this.hideError();
+    }
+  }
+
+  // Initialize ProgressIndicator
+  const progressIndicator = new ProgressIndicator();
+
+  // ================= EXISTING ELEMENTS MANAGER =================
+  
+  class ExistingElementsManager {
+    constructor() {
+      this.container = document.getElementById('existingElements');
+      this.infoElement = document.getElementById('existingElementsInfo');
+      this.navigateButton = document.getElementById('navigateToElements');
+      this.currentElements = null;
+      
+      this.setupEventListeners();
+    }
+
+    setupEventListeners() {
+      this.navigateButton.addEventListener('click', () => {
+        if (this.currentElements && this.currentElements.frameNode) {
+          parent.postMessage({
+            pluginMessage: {
+              type: 'navigate-to-elements',
+              parentFrameId: this.currentElements.frameNode.id
+            }
+          }, '*');
+        }
+      });
+    }
+
+    displayElements(elementsData) {
+      if (!elementsData || !elementsData.exists) {
+        this.hide();
+        return;
+      }
+
+      this.currentElements = elementsData.elements;
+      
+      // Format creation date
+      const createdDate = new Date(this.currentElements.createdAt);
+      const dateStr = createdDate.toLocaleDateString() + ' ' + createdDate.toLocaleTimeString();
+      
+      // Display information
+      this.infoElement.innerHTML = `
+        <div><strong>${this.currentElements.frameNode.name}</strong></div>
+        <div class="existing-elements-detail">
+          ${this.currentElements.slideCount} slides created on ${dateStr}
+        </div>
+      `;
+      
+      this.show();
+    }
+
+    show() {
+      this.container.style.display = 'block';
+    }
+
+    hide() {
+      this.container.style.display = 'none';
+      this.currentElements = null;
+    }
+  }
+
+  // Initialize ExistingElementsManager
+  const existingElementsManager = new ExistingElementsManager();
+
+  document.getElementById('generate').onclick = async () => {
+    const validation = generatorForm.validate();
+
+    if (!validation.isValid) {
+      alert('Please fill in all required fields:\n' + validation.errors.join('\n'));
+      return;
+    }
+
+    const formData = generatorForm.getFormData();
+
+    // Save state before sending message
+    tabManager.saveTabState('generator');
+
+    // Show progress indicator
+    progressIndicator.reset();
+    progressIndicator.show();
+    progressIndicator.setStage('story-generation');
+    progressIndicator.updateProgress(10);
+
+    parent.postMessage({
+      pluginMessage: {
+        type: 'generate-screenshots',
+        appDescription: formData
+      }
+    }, '*');
+  };
+
+  // ================= MESSAGE HANDLER FROM PLUGIN =================
+  window.onmessage = (event) => {
+    const msg = event.data.pluginMessage;
+    if (!msg) return;
+
+    // Handle state restoration from plugin storage
+    if (msg.type === 'restore-tab-state') {
+      tabManager.applyPersistedState(msg.state);
+    }
+
+    // Handle elements check result
+    if (msg.type === 'elements-check-result') {
+      existingElementsManager.displayElements(msg.data);
+    }
+
+    // Handle elements created
+    if (msg.type === 'elements-created') {
+      // Elements were just created, will be shown on next tab switch
+      console.log('Elements created:', msg.data);
+    }
+
+    // Handle story generation complete
+    if (msg.type === 'story-generated') {
+      progressIndicator.updateProgress(100);
+      progressIndicator.setStage('complete');
+      
+      // Display story in editor after a brief delay
+      setTimeout(() => {
+        progressIndicator.hide();
+        storyEditor.displayStory(msg.data);
+      }, 500);
+    }
+
+    // Handle slide regeneration complete
+    if (msg.type === 'slide-regenerated') {
+      const { slideIndex, slideData } = msg.data;
+      storyEditor.updateRegeneratedSlide(slideIndex, slideData);
+    }
+
+    // Handle background generation progress
+    if (msg.type === 'background-generated') {
+      const { index, total } = msg.data;
+      const percent = Math.round((index / total) * 100);
+      progressIndicator.updateProgress(percent);
+      
+      // Update estimated time based on remaining backgrounds
+      if (index < total) {
+        const remaining = (total - index) * 12; // Estimate 12s per background
+        progressIndicator.setEstimatedTime(remaining);
+      } else {
+        progressIndicator.setEstimatedTime(0);
+      }
+    }
+
+    // Handle progress updates
+    if (msg.type === 'progress-update') {
+      const { stage, percent } = msg.data;
+      progressIndicator.setStage(stage);
+      progressIndicator.updateProgress(percent);
+    }
+
+    // Handle errors
+    if (msg.type === 'error') {
+      progressIndicator.showError(msg.data.message);
+      progressIndicator.updateProgress(0);
+    }
+
+    // Handle completion
+    if (msg.type === 'complete') {
+      progressIndicator.setStage('complete');
+      progressIndicator.updateProgress(100);
+      progressIndicator.setEstimatedTime(0);
+      
+      setTimeout(() => {
+        progressIndicator.hide();
+        alert('Screenshots generated successfully!');
+        
+        // Check for elements after creation
+        tabManager.checkExistingElements();
+      }, 1500);
+    }
+  };
+
+</script>
+
+</body>
+</html>

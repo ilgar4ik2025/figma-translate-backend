@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>UI Components Test</title>
+  <style>
+    body {
+      font-family: Inter, system-ui, sans-serif;
+      padding: 20px;
+      max-width: 400px;
+      margin: 0 auto;
+    }
+    .test-section {
+      margin-bottom: 30px;
+      padding: 20px;
+      border: 2px solid #e5e5e5;
+      border-radius: 8px;
+    }
+    .test-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 15px;
+      color: #333;
+    }
+    button {
+      padding: 10px 20px;
+      margin: 5px;
+      border: none;
+      border-radius: 6px;
+      background: #0d99ff;
+      color: white;
+      cursor: pointer;
+      font-size: 13px;
+    }
+    button:hover {
+      background: #007be5;
+    }
+  </style>
+</head>
+<body>
+
+<h1>UI Components Test</h1>
+
+<div class="test-section">
+  <div class="test-title">StoryEditor Test</div>
+  <button onclick="testStoryEditor()">Test StoryEditor</button>
+  <button onclick="testSlideReordering()">Test Slide Reordering</button>
+  <button onclick="testSlideRegeneration()">Test Slide Regeneration</button>
+  <button onclick="hideStoryEditor()">Hide StoryEditor</button>
+  <div id="storyEditorTest"></div>
+</div>
+
+<div class="test-section">
+  <div class="test-title">ProgressIndicator Test</div>
+  <button onclick="testProgressIndicator()">Test Progress</button>
+  <button onclick="testProgressError()">Test Error</button>
+  <button onclick="hideProgress()">Hide Progress</button>
+  <div id="progressTest"></div>
+</div>
+
+<script>
+  // Mock story data
+  const mockStory = {
+    slides: [
+      {
+        index: 0,
+        headline: "Transform Your Workflow",
+        subheadline: "Boost productivity with AI-powered tools",
+        description: "A modern, clean background with abstract productivity elements"
+      },
+      {
+        index: 1,
+        headline: "Smart Automation",
+        subheadline: "Let AI handle repetitive tasks",
+        description: "Futuristic tech background with automation theme"
+      },
+      {
+        index: 2,
+        headline: "Real-time Collaboration",
+        subheadline: "Work together seamlessly from anywhere",
+        description: "Connected network visualization with team collaboration theme"
+      },
+      {
+        index: 3,
+        headline: "Trusted by Thousands",
+        subheadline: "Join professionals who love our app",
+        description: "Professional, trustworthy background with social proof elements"
+      },
+      {
+        index: 4,
+        headline: "Start Free Today",
+        subheadline: "No credit card required",
+        description: "Inviting, call-to-action themed background"
+      }
+    ]
+  };
+
+  // Inline StoryEditor for testing
+  class StoryEditor {
+    constructor(containerId) {
+      this.container = document.getElementById(containerId);
+      this.story = null;
+    }
+
+    displayStory(story) {
+      this.story = story;
+      this.container.innerHTML = '';
+      
+      const editorDiv = document.createElement('div');
+      editorDiv.style.cssText = 'margin-top: 16px; border: 1px solid #e5e5e5; border-radius: 8px; padding: 16px; background: #fafafa;';
+      
+      const title = document.createElement('h3');
+      title.textContent = 'Review and Edit Story';
+      title.style.cssText = 'margin: 0 0 12px 0; font-size: 14px; font-weight: 600;';
+      editorDiv.appendChild(title);
+
+      story.slides.forEach((slide, index) => {
+        const slideDiv = this.createSlideElement(slide, index);
+        editorDiv.appendChild(slideDiv);
+      });
+
+      const confirmBtn = document.createElement('button');
+      confirmBtn.textContent = 'Confirm and Generate Backgrounds';
+      confirmBtn.style.cssText = 'width: 100%; margin-top: 12px;';
+      confirmBtn.onclick = () => alert('Story confirmed! Would send to backend.');
+      editorDiv.appendChild(confirmBtn);
+
+      this.container.appendChild(editorDiv);
+    }
+
+    createSlideElement(slide, index) {
+      const slideDiv = document.createElement('div');
+      slideDiv.style.cssText = 'background: white; border: 1px solid #e5e5e5; border-radius: 8px; padding: 12px; margin-bottom: 12px;';
+      slideDiv.dataset.index = index;
+      
+      slideDiv.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <div style="font-size: 12px; font-weight: 600; color: #0d99ff;">Slide ${index + 1}</div>
+          <div style="display: flex; gap: 4px;">
+            <button 
+              class="move-up-btn" 
+              data-index="${index}"
+              style="width: 28px; height: 28px; border: 1px solid #dcdcdc; border-radius: 6px; background: white; color: #333; font-size: 14px; cursor: pointer; padding: 0;"
+              ${index === 0 ? 'disabled' : ''}
+              title="Move up"
+            >▲</button>
+            <button 
+              class="move-down-btn" 
+              data-index="${index}"
+              style="width: 28px; height: 28px; border: 1px solid #dcdcdc; border-radius: 6px; background: white; color: #333; font-size: 14px; cursor: pointer; padding: 0;"
+              ${index === this.story.slides.length - 1 ? 'disabled' : ''}
+              title="Move down"
+            >▼</button>
+            <button 
+              class="regenerate-btn" 
+              data-index="${index}"
+              style="width: auto; height: 28px; padding: 0 12px; border: 1px solid #0d99ff; border-radius: 6px; background: white; color: #0d99ff; font-size: 12px; cursor: pointer;"
+              title="Regenerate this slide"
+            >🔄 Regenerate</button>
+          </div>
+        </div>
+        <input 
+          type="text" 
+          value="${this.escapeHtml(slide.headline)}"
+          placeholder="Headline"
+          style="width: 100%; padding: 6px 8px; border: 1px solid #dcdcdc; border-radius: 6px; margin-bottom: 8px; box-sizing: border-box;"
+        />
+        <input 
+          type="text" 
+          value="${this.escapeHtml(slide.subheadline)}"
+          placeholder="Subheadline"
+          style="width: 100%; padding: 6px 8px; border: 1px solid #dcdcdc; border-radius: 6px; margin-bottom: 8px; box-sizing: border-box;"
+        />
+        <div style="font-size: 11px; color: #777; line-height: 1.4;">${this.escapeHtml(slide.description)}</div>
+      `;
+
+      // Add event listeners for reordering buttons
+      const moveUpBtn = slideDiv.querySelector('.move-up-btn');
+      const moveDownBtn = slideDiv.querySelector('.move-down-btn');
+      const regenerateBtn = slideDiv.querySelector('.regenerate-btn');
+      
+      if (moveUpBtn) {
+        moveUpBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          this.moveSlideUp(index);
+        });
+      }
+      
+      if (moveDownBtn) {
+        moveDownBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          this.moveSlideDown(index);
+        });
+      }
+
+      if (regenerateBtn) {
+        regenerateBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          this.regenerateSlide(index);
+        });
+      }
+      
+      return slideDiv;
+    }
+
+    moveSlideUp(index) {
+      if (index === 0 || !this.story || !this.story.slides) return;
+      
+      // Swap slides
+      const temp = this.story.slides[index];
+      this.story.slides[index] = this.story.slides[index - 1];
+      this.story.slides[index - 1] = temp;
+      
+      // Update indices
+      this.story.slides[index].index = index;
+      this.story.slides[index - 1].index = index - 1;
+      
+      // Re-render
+      this.displayStory(this.story);
+    }
+
+    moveSlideDown(index) {
+      if (!this.story || !this.story.slides || index >= this.story.slides.length - 1) return;
+      
+      // Swap slides
+      const temp = this.story.slides[index];
+      this.story.slides[index] = this.story.slides[index + 1];
+      this.story.slides[index + 1] = temp;
+      
+      // Update indices
+      this.story.slides[index].index = index;
+      this.story.slides[index + 1].index = index + 1;
+      
+      // Re-render
+      this.displayStory(this.story);
+    }
+
+    reorderSlides(newOrder) {
+      if (!this.story || !this.story.slides) return;
+      
+      // Validate newOrder array
+      if (!Array.isArray(newOrder) || newOrder.length !== this.story.slides.length) {
+        console.error('Invalid newOrder array');
+        return;
+      }
+      
+      // Create new slides array based on newOrder
+      const reorderedSlides = newOrder.map((oldIndex, newIndex) => {
+        const slide = { ...this.story.slides[oldIndex] };
+        slide.index = newIndex;
+        return slide;
+      });
+      
+      this.story.slides = reorderedSlides;
+      
+      // Re-render
+      this.displayStory(this.story);
+    }
+
+    regenerateSlide(slideIndex) {
+      if (!this.story || !this.story.slides[slideIndex]) {
+        console.error('Invalid slide index:', slideIndex);
+        return;
+      }
+
+      console.log(`Regenerating slide ${slideIndex}...`);
+      
+      // Find the regenerate button and update its state
+      const slideElements = this.container.querySelectorAll('[data-index]');
+      const slideElement = Array.from(slideElements).find(el => 
+        el.dataset.index === slideIndex.toString()
+      );
+      
+      if (slideElement) {
+        const regenerateBtn = slideElement.querySelector('.regenerate-btn');
+        if (regenerateBtn) {
+          regenerateBtn.disabled = true;
+          regenerateBtn.style.opacity = '0.5';
+          regenerateBtn.innerHTML = '⏳ Regenerating...';
+        }
+      }
+
+      // Simulate regeneration with a timeout
+      setTimeout(() => {
+        const regeneratedSlide = {
+          headline: this.story.slides[slideIndex].headline + ' (Regenerated)',
+          subheadline: this.story.slides[slideIndex].subheadline + ' (Updated)',
+          description: this.story.slides[slideIndex].description + ' [Regenerated version]'
+        };
+        
+        this.updateRegeneratedSlide(slideIndex, regeneratedSlide);
+        console.log(`Slide ${slideIndex} regenerated successfully!`);
+      }, 1500);
+    }
+
+    updateRegeneratedSlide(slideIndex, newSlideData) {
+      if (!this.story || !this.story.slides[slideIndex]) {
+        console.error('Invalid slide index:', slideIndex);
+        return;
+      }
+
+      // Update the slide data
+      this.story.slides[slideIndex] = {
+        ...this.story.slides[slideIndex],
+        ...newSlideData,
+        index: slideIndex // Preserve the index
+      };
+
+      // Re-render the entire story to update the UI
+      this.displayStory(this.story);
+    }
+
+    escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    hide() {
+      this.container.innerHTML = '';
+    }
+  }
+
+  // Inline ProgressIndicator for testing
+  class ProgressIndicator {
+    constructor(containerId) {
+      this.container = document.getElementById(containerId);
+      this.currentPercent = 0;
+    }
+
+    show() {
+      this.container.innerHTML = `
+        <div style="margin-top: 16px; border: 1px solid #e5e5e5; border-radius: 8px; padding: 16px; background: #fafafa;">
+          <div id="stage" style="font-size: 13px; font-weight: 600; margin-bottom: 8px;">Initializing...</div>
+          <div style="width: 100%; height: 8px; background: #e5e5e5; border-radius: 4px; overflow: hidden; margin-bottom: 8px;">
+            <div id="bar" style="height: 100%; background: linear-gradient(90deg, #0d99ff, #00d4ff); border-radius: 4px; transition: width 0.3s ease; width: 0%;"></div>
+          </div>
+          <div id="time" style="font-size: 11px; color: #777; text-align: center;"></div>
+          <div id="error" style="display: none; background: #fff5f5; border: 1px solid #ffcccc; border-radius: 6px; padding: 12px; margin-top: 8px;">
+            <div style="font-size: 12px; font-weight: 600; color: #cc0000; margin-bottom: 4px;">Error</div>
+            <div id="errorMsg" style="font-size: 11px; color: #666;"></div>
+          </div>
+        </div>
+      `;
+    }
+
+    setStage(stage) {
+      const stageNames = {
+        'story-generation': 'Generating story structure...',
+        'background-generation': 'Generating backgrounds...',
+        'composition': 'Creating slides in Figma...',
+        'complete': 'Complete!'
+      };
+      const stageEl = document.getElementById('stage');
+      if (stageEl) stageEl.textContent = stageNames[stage] || stage;
+    }
+
+    updateProgress(percent) {
+      this.currentPercent = Math.max(0, Math.min(100, percent));
+      const bar = document.getElementById('bar');
+      if (bar) bar.style.width = `${this.currentPercent}%`;
+    }
+
+    setEstimatedTime(seconds) {
+      const timeEl = document.getElementById('time');
+      if (!timeEl) return;
+      
+      if (seconds <= 0) {
+        timeEl.textContent = '';
+        return;
+      }
+
+      if (seconds < 60) {
+        timeEl.textContent = `Estimated time: ${seconds}s`;
+      } else {
+        const minutes = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        timeEl.textContent = `Estimated time: ${minutes}m ${secs}s`;
+      }
+    }
+
+    showError(message) {
+      const errorEl = document.getElementById('error');
+      const errorMsg = document.getElementById('errorMsg');
+      if (errorEl && errorMsg) {
+        errorMsg.textContent = message;
+        errorEl.style.display = 'block';
+      }
+    }
+
+    hide() {
+      this.container.innerHTML = '';
+    }
+  }
+
+  // Test functions
+  const storyEditor = new StoryEditor('storyEditorTest');
+  const progressIndicator = new ProgressIndicator('progressTest');
+
+  function testStoryEditor() {
+    storyEditor.displayStory(mockStory);
+  }
+
+  function testSlideReordering() {
+    // Test the reorderSlides method with a custom order
+    storyEditor.displayStory(mockStory);
+    
+    // After 2 seconds, reorder slides: [4, 3, 2, 1, 0] (reverse order)
+    setTimeout(() => {
+      console.log('Reordering slides to reverse order...');
+      storyEditor.reorderSlides([4, 3, 2, 1, 0]);
+    }, 2000);
+    
+    // After 4 seconds, reorder back to original: [0, 1, 2, 3, 4]
+    setTimeout(() => {
+      console.log('Reordering slides back to original order...');
+      storyEditor.reorderSlides([0, 1, 2, 3, 4]);
+    }, 4000);
+  }
+
+  function testSlideRegeneration() {
+    // Display the story first
+    storyEditor.displayStory(mockStory);
+    
+    // After 1 second, regenerate slide 2 (index 1)
+    setTimeout(() => {
+      console.log('Testing regeneration of slide 2...');
+      storyEditor.regenerateSlide(1);
+    }, 1000);
+    
+    // After 4 seconds, regenerate slide 4 (index 3)
+    setTimeout(() => {
+      console.log('Testing regeneration of slide 4...');
+      storyEditor.regenerateSlide(3);
+    }, 4000);
+  }
+
+  function hideStoryEditor() {
+    storyEditor.hide();
+  }
+
+  function testProgressIndicator() {
+    progressIndicator.show();
+    progressIndicator.setStage('story-generation');
+    progressIndicator.updateProgress(0);
+    progressIndicator.setEstimatedTime(30);
+
+    // Simulate progress
+    let progress = 0;
+    const interval = setInterval(() => {
+      progress += 10;
+      progressIndicator.updateProgress(progress);
+      
+      if (progress >= 50) {
+        progressIndicator.setStage('background-generation');
+      }
+      
+      if (progress >= 100) {
+        clearInterval(interval);
+        progressIndicator.setStage('complete');
+        progressIndicator.setEstimatedTime(0);
+      }
+    }, 500);
+  }
+
+  function testProgressError() {
+    progressIndicator.show();
+    progressIndicator.setStage('story-generation');
+    progressIndicator.updateProgress(30);
+    progressIndicator.showError('Failed to connect to API. Please check your internet connection and try again.');
+  }
+
+  function hideProgress() {
+    progressIndicator.hide();
+  }
+</script>
+
+</body>
+</html>
